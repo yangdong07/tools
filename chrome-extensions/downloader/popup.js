@@ -1,3 +1,4 @@
+'use strict';
 // Copyright (c) 2012 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -36,7 +37,7 @@ function showLinks() {
 
 // Toggle the checked state of all visible links.
 function toggleAll() {
-  console.log('toggle');
+  // console.log('toggle');
   var checked = document.getElementById('toggle_all').checked;
   for (var i = 0; i < visibleLinks.length; ++i) {
     document.getElementById('check' + i).checked = checked;
@@ -48,12 +49,13 @@ function downloadCheckedLinks() {
   console.log('hello');
   for (var i = 0; i < visibleLinks.length; ++i) {
     if (document.getElementById('check' + i).checked) {
+      // console.log(visibleLinks[i]);
       chrome.downloads.download({url: visibleLinks[i]},
                                              function(id) {
       });
     }
   }
-  window.close();
+  // window.close();
 }
 
 // Re-filter allLinks into visibleLinks and reshow visibleLinks.
@@ -88,10 +90,15 @@ function filterLinks() {
   showLinks();
 }
 
-// Add links to allLinks and visibleLinks, sort and show them.  send_links.js is
-// injected into all frames of the active tab, so this listener may be called
-// multiple times.
-chrome.extension.onRequest.addListener(function(links) {
+
+var allImages = [];
+var visibleImages = [];
+var linkedImages = {};
+
+// Add images to `allImages` and trigger filtration
+// `send_images.js` is injected into all frames of the active tab, so this listener may be called multiple times
+chrome.runtime.onMessage.addListener(function (links) {
+  chrome.downloads.download({ url: 'https://hub.coursera-notebooks.org/user/kupmcxxwxyriavidszkfyy/files/week4/Face%20Recognition/images/andrew.jpg' });
   for (var index in links) {
     allLinks.push(links[index]);
   }
@@ -100,8 +107,6 @@ chrome.extension.onRequest.addListener(function(links) {
   showLinks();
 });
 
-// Set up event handlers and inject send_links.js into all frames in the active
-// tab.
 window.onload = function() {
   document.getElementById('filter').onkeyup = filterLinks;
   document.getElementById('regex').onchange = filterLinks;
@@ -109,11 +114,16 @@ window.onload = function() {
   document.getElementById('download0').onclick = downloadCheckedLinks;
   document.getElementById('download1').onclick = downloadCheckedLinks;
 
-  chrome.windows.getCurrent(function (currentWindow) {
-    chrome.tabs.query({active: true, windowId: currentWindow.id},
-                      function(activeTabs) {
-      chrome.tabs.executeScript(
-        activeTabs[0].id, {file: 'send_links.js', allFrames: true});
-    });
+chrome.windows.getCurrent(function (currentWindow) {
+  chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
+    chrome.tabs.executeScript(activeTabs[0].id, { file: 'send_links.js', allFrames: true });
   });
+});
+  // chrome.windows.getCurrent(function (currentWindow) {
+  //   chrome.tabs.query({active: true, windowId: currentWindow.id},
+  //                     function(activeTabs) {
+  //     chrome.tabs.executeScript(
+  //       activeTabs[0].id, {file: 'send_links.js', allFrames: true});
+  //   });
+  // });
 };
