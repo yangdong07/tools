@@ -40,4 +40,4 @@ for (var i = 0; i < links.length;) {
   }
 }
 
-chrome.runtime.sendMessage(links);
+chrome.extension.sendRequest(links);
